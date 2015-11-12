@@ -2,9 +2,15 @@ __author__ = 'Ryan Shean'
 
 #TODO: Try to fix the arbitary assignment of synsets and hypernyms
 #TODO: graphs w/ matlabplot lib ?
-#TODO: Capture the unknown words for posterity
 #TODO: update the variable names to not have typing
 
+#Honestly this code is black magic right now
+#Anaconda broke my file reading and this fixes the problem so don't ask
+import sys
+reload(sys)
+sys.setdefaultencoding("ISO-8859-1")
+import matplotlib.pyplot as plt
+import numpy as np
 import nltk
 from nltk.corpus import wordnet
 
@@ -15,6 +21,7 @@ def read_lemmas(path):
     tokens = []
     for word in open(path).read().split():
         tokens.append(word)
+
     lemmas = [nltk.WordNetLemmatizer().lemmatize(t) for t in tokens]
     return lemmas
 
@@ -73,14 +80,15 @@ def sort_print(map):
         #Hardcoded tolerance, should probobly fix by passing as argument
         if map[w] > 3:
             print(w, map[w])
-    print("\n\n\n")
+    print("\n\n")
 
 
 
 #I think this allows this code to be imported as a module
 if __name__ == '__main__':
     #Open file and tokenize into strings
-    lemmas = read_lemmas("allwords.txt")
+    path = 'ffbs.txt'
+    lemmas = read_lemmas(path)
 
     #match all the words to a (somewhat arbitrary) wordnet definition
     #and then count them grab the known words and unknowns with
@@ -103,17 +111,42 @@ if __name__ == '__main__':
     hypers_counts_4 = create_counts(hypers_4)
 
 
+    #This printing code is horrible and I'll generalize it eventually
+    #I also need a way larger plot, but I can work those things out later
+    x_label = []
+    y_data = []
+    for w in sorted(hypers_counts_2, key=hypers_counts_2.get, reverse=True):
+        if hypers_counts_2[w] > 10:
+            x_label.append(w.name().partition('.')[0])
+            y_data.append(hypers_counts_2[w])
 
+    counter = 0
+    x_pos = []
+    for t in x_label:
+        x_pos.append(counter)
+        counter += 1
+
+    plt.bar(x_pos,y_data)
+    plt.xticks(x_pos, x_label)
+
+    plt.show()
     #Print all dat shit
+    #Comment this shit out so I can tryna print more
+    """
+    print(path)
+    print("\n")
+    print("Parts of Speech:\n")
     sort_print(tag_pos(lemmas))
     print("\n\n\n")
-    print("Words Detected:")
+    print("Words Detected:\n")
     sort_print(synset_counts)
-    print("First Level of Hypernyms:")
+    print("First Level of Hypernyms:\n")
     sort_print(hypers_counts_1)
-    print("Second Level of Hypernyms:")
+    print("Second Level of Hypernyms:\n")
     sort_print(hypers_counts_2)
-    print("Third Level of Hypernyms:")
+    print("Third Level of Hypernyms:\n")
     sort_print(hypers_counts_3)
-    print("Fourth Level of Hypernyms:")
+    print("Fourth Level of Hypernyms:\n")
     sort_print(hypers_counts_4)
+    """
+
