@@ -1,8 +1,10 @@
 __author__ = 'Ryan Shean'
 
 #TODO: Try to fix the arbitary assignment of synsets and hypernyms
-#TODO: graphs w/ matlabplot lib ?
-#TODO: update the variable names to not have typing
+#TODO: Make better graphs
+#TODO: Make the analysis a function that writes a new file
+#TODO: update the variable names to not have typing or be named the same as default types
+
 
 #Honestly this code is black magic right now
 #Anaconda broke my file reading and this fixes the problem so don't ask
@@ -17,7 +19,6 @@ from nltk.corpus import wordnet
 #function that tokenizes a file given a path and returns a list of all tokens
 #as lemmatized strings
 def read_lemmas(path):
-    lemmas = []
     tokens = []
     for word in open(path).read().split():
         tokens.append(word)
@@ -28,10 +29,10 @@ def read_lemmas(path):
 #Takes a list of text strings and returns a list of snyset object coresponding to
 #the strings, duplicates are allowed and strings that do not have synsets are
 #put in another list and returned as a tuple(?) that needs to be indexed to grab
-def make_synset(list):
+def make_synset(all_lemmas):
     syn_list = []
     unknown_words = []
-    for word in list:
+    for word in all_lemmas:
         try:
             syn_list.append(wordnet.synsets(word)[0])
         except IndexError:
@@ -74,13 +75,31 @@ def create_counts(list):
             counts[item] = 1
     return counts
 
-#Takes a map of keys and values and prints them in decending orderd
-def sort_print(map):
+#Takes a map of Synset Objects and values representing their counts as well as integer tolerance
+#and prints the name of the sysnset objects that appear more than the tolerance in decending order
+def sort_print(map, tolerance):
     for w in sorted(map, key=map.get, reverse=True):
-        #Hardcoded tolerance, should probobly fix by passing as argument
-        if map[w] > 3:
+        if map[w] > tolerance:
             print(w, map[w])
     print("\n\n")
+
+#Takes a map of wordnet Sysnset objects and counts and an interger tolerance and displays a bar
+#graph of the names of the synset objects with their frequencies on the y-axis. Only prints words
+#that appear in the map more times than the passed tolerance
+def graph_frequencies(map, tolerance):
+        x_label = []
+        y_data = []
+        number_of_entries = 0
+        for w in sorted(map, key=map.get, reverse=True):
+            if map[w] > tolerance:
+                number_of_entries += 1
+                x_label.append(w.name().partition('.')[0])
+                y_data.append(map[w])
+        x_pos = np.arange(number_of_entries)
+        plt.bar(x_pos,y_data)
+        plt.xticks(x_pos, x_label)
+        plt.show()
+
 
 
 
@@ -111,42 +130,26 @@ if __name__ == '__main__':
     hypers_counts_4 = create_counts(hypers_4)
 
 
-    #This printing code is horrible and I'll generalize it eventually
-    #I also need a way larger plot, but I can work those things out later
-    x_label = []
-    y_data = []
-    for w in sorted(hypers_counts_2, key=hypers_counts_2.get, reverse=True):
-        if hypers_counts_2[w] > 10:
-            x_label.append(w.name().partition('.')[0])
-            y_data.append(hypers_counts_2[w])
 
-    counter = 0
-    x_pos = []
-    for t in x_label:
-        x_pos.append(counter)
-        counter += 1
 
-    plt.bar(x_pos,y_data)
-    plt.xticks(x_pos, x_label)
 
-    plt.show()
-    #Print all dat shit
-    #Comment this shit out so I can tryna print more
-    """
+    graph_frequencies(hypers_counts_2, 10)
+
+
+
     print(path)
     print("\n")
     print("Parts of Speech:\n")
-    sort_print(tag_pos(lemmas))
+    sort_print(tag_pos(lemmas), 10)
     print("\n\n\n")
     print("Words Detected:\n")
-    sort_print(synset_counts)
+    sort_print(synset_counts, 10)
     print("First Level of Hypernyms:\n")
-    sort_print(hypers_counts_1)
+    sort_print(hypers_counts_1, 10)
     print("Second Level of Hypernyms:\n")
-    sort_print(hypers_counts_2)
+    sort_print(hypers_counts_2, 10)
     print("Third Level of Hypernyms:\n")
-    sort_print(hypers_counts_3)
+    sort_print(hypers_counts_3, 10)
     print("Fourth Level of Hypernyms:\n")
-    sort_print(hypers_counts_4)
-    """
+    sort_print(hypers_counts_4, 10)
 
