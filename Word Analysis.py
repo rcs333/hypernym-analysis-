@@ -3,6 +3,7 @@ __author__ = 'Ryan Shean'
 #TODO: Try to fix the arbitary assignment of synsets and hypernyms
 #TODO: Make better graphs
 #TODO: Make the analysis a function that writes a new file
+#TODO: update the variable names to not have typing or be named the same as default types
 
 
 #Honestly this code is black magic right now
@@ -17,8 +18,12 @@ from nltk.corpus import wordnet
 
 #function that tokenizes a file given a path and returns a list of all tokens
 #as lemmatized strings
-def read_lemmas(file_path):
-    lemmas = [nltk.WordNetLemmatizer().lemmatize(token) for token in open(file_path).read().split()]
+def read_lemmas(path):
+    tokens = []
+    for word in open(path).read().split():
+        tokens.append(word)
+
+    lemmas = [nltk.WordNetLemmatizer().lemmatize(t) for t in tokens]
     return lemmas
 
 #Takes a list of text strings and returns a list of snyset object coresponding to
@@ -36,9 +41,9 @@ def make_synset(all_lemmas):
 
 #Takes a list of synsnet objects and creates and returns a list of all hypernyms
 #inside of the list, duplicates are allowed and the list is completely unsorted
-def make_hyper_list(synsets):
+def make_hyper_list(list):
     hyper_list = []
-    for token in synsets:
+    for token in list:
         try:
             hyper_list.append(token.hypernyms()[0])
         except IndexError:
@@ -48,8 +53,8 @@ def make_hyper_list(synsets):
 #takes a list of words and returns a map containing parts of speech and their counts
 #Had to be hardcoded because POS tagging output tuples(?) and I didn't want to have to deal
 #with generalizing the other function
-def tag_pos(lemmas):
-    pos_tagged = nltk.pos_tag(lemmas)
+def tag_pos(list):
+    pos_tagged = nltk.pos_tag(list)
     pos_map = {}
     for item in pos_tagged:
         pos = item[1]
@@ -61,9 +66,9 @@ def tag_pos(lemmas):
 
 #Takes a list of any object and counts them and creates a map
 #probobly inefficient but I'm not working with an extremly large data set
-def create_counts(frequency_map):
+def create_counts(list):
     counts = {}
-    for item in frequency_map:
+    for item in list:
         if item in counts:
             counts[item] += 1
         else:
@@ -72,28 +77,28 @@ def create_counts(frequency_map):
 
 #Takes a map of Synset Objects and values representing their counts as well as integer tolerance
 #and prints the name of the sysnset objects that appear more than the tolerance in decending order
-def sort_print(frequency_map, tolerance):
-    for word in sorted(frequency_map, key=frequency_map.get, reverse=True):
-        if map[word] > tolerance:
-            print(word, frequency_map[word])
+def sort_print(map, tolerance):
+    for w in sorted(map, key=map.get, reverse=True):
+        if map[w] > tolerance:
+            print(w, map[w])
     print("\n\n")
 
 #Takes a map of wordnet Sysnset objects and counts and an interger tolerance and displays a bar
 #graph of the names of the synset objects with their frequencies on the y-axis. Only prints words
 #that appear in the map more times than the passed tolerance
-def graph_frequencies(frequency_map, tolerance):
+def graph_frequencies(map, tolerance):
         x_label = []
         y_data = []
         number_of_entries = 0
-        for word in sorted(frequency_map, key=frequency_map.get, reverse=True):
-            if frequency_map[word] > tolerance:
+        for w in sorted(map, key=map.get, reverse=True):
+            if map[w] > tolerance:
                 number_of_entries += 1
-                x_label.append(word.name().partition('.')[0])
-                y_data.append(frequency_map[word])
+                x_label.append(w.name().partition('.')[0])
+                y_data.append(map[w])
         x_pos = np.arange(number_of_entries)
         plt.bar(x_pos,y_data)
         plt.xticks(x_pos, x_label)
-
+        plt.show()
 
 
 
@@ -127,17 +132,9 @@ if __name__ == '__main__':
 
 
 
-    plt.figure(1)
-    graph_frequencies(synset_counts, 10)
-    plt.figure(2)
-    graph_frequencies(hypers_counts_1, 10)
-    plt.figure(3)
+
     graph_frequencies(hypers_counts_2, 10)
-    plt.figure(4)
-    graph_frequencies(hypers_counts_3, 10)
-    plt.figure(5)
-    graph_frequencies(hypers_counts_4, 10)
-    plt.show()
+
 
 
     print(path)
@@ -155,5 +152,4 @@ if __name__ == '__main__':
     sort_print(hypers_counts_3, 10)
     print("Fourth Level of Hypernyms:\n")
     sort_print(hypers_counts_4, 10)
-
 
