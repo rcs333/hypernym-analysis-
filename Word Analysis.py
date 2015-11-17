@@ -74,7 +74,7 @@ def create_counts(frequency_map):
 #and prints the name of the sysnset objects that appear more than the tolerance in decending order
 def sort_print(frequency_map, tolerance):
     for word in sorted(frequency_map, key=frequency_map.get, reverse=True):
-        if map[word] > tolerance:
+        if frequency_map[word] > tolerance:
             print(word, frequency_map[word])
     print("\n\n")
 
@@ -100,13 +100,13 @@ def graph_frequencies(frequency_map, tolerance):
 
 #I think this allows this code to be imported as a module
 if __name__ == '__main__':
+
     #Open file and tokenize into strings
-    path = 'ffbs.txt'
+    path = 'speaking.txt'
     lemmas = read_lemmas(path)
 
     #match all the words to a (somewhat arbitrary) wordnet definition
-    #and then count them grab the known words and unknowns with
-    #AUTOMATIC UNPACKING HOLY SHIT THATS COOL
+    #and then count them grab the known words and unknowns
     synset,unknowns = make_synset(lemmas)
     synset_counts = create_counts(synset)
 
@@ -128,32 +128,31 @@ if __name__ == '__main__':
 
 
     plt.figure(1)
-    graph_frequencies(synset_counts, 10)
+    graph_frequencies(synset_counts, 5)
     plt.figure(2)
-    graph_frequencies(hypers_counts_1, 10)
+    graph_frequencies(hypers_counts_1, 8)
     plt.figure(3)
-    graph_frequencies(hypers_counts_2, 10)
+    graph_frequencies(hypers_counts_2, 5)
     plt.figure(4)
-    graph_frequencies(hypers_counts_3, 10)
+    graph_frequencies(hypers_counts_3, 7)
     plt.figure(5)
-    graph_frequencies(hypers_counts_4, 10)
+    graph_frequencies(hypers_counts_4, 20)
     plt.show()
 
 
     print(path)
     print("\n")
     print("Parts of Speech:\n")
-    sort_print(tag_pos(lemmas), 10)
+    sort_print(tag_pos(lemmas), 4)
     print("\n\n\n")
     print("Words Detected:\n")
-    sort_print(synset_counts, 10)
+
+    sort_print(synset_counts, 4)
     print("First Level of Hypernyms:\n")
-    sort_print(hypers_counts_1, 10)
+    sort_print(hypers_counts_1, 4)
     print("Second Level of Hypernyms:\n")
-    sort_print(hypers_counts_2, 10)
+    sort_print(hypers_counts_2, 4)
     print("Third Level of Hypernyms:\n")
-    sort_print(hypers_counts_3, 10)
+    sort_print(hypers_counts_3, 4)
     print("Fourth Level of Hypernyms:\n")
-    sort_print(hypers_counts_4, 10)
-
-
+    sort_print(hypers_counts_4, 4)
