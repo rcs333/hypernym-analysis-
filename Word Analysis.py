@@ -1,8 +1,12 @@
 __author__ = 'Ryan Shean'
 
-#TODO: Try to fix the arbitary assignment of synsets and hypernyms
-#TODO: Make better graphs
-#TODO: Make the analysis a function that writes a new file
+#TODO: Try to fix the arbitary assignment of synsets and hypernyms, maybe with POS tags?
+#TODO: Make the analysis a function
+#TODO: update to pep 8
+#TODO: Analyze algorithm
+#TODO: Try to rework data structure so that I can catch hypernyms regardless of position organize by level of "meaning"
+#TODO: Fix the black magic text encoding section to excise the demons within
+
 
 
 #Honestly this code is black magic right now
@@ -75,7 +79,7 @@ def create_counts(frequency_map):
 def sort_print(frequency_map, tolerance):
     for word in sorted(frequency_map, key=frequency_map.get, reverse=True):
         if frequency_map[word] > tolerance:
-            print(word, frequency_map[word])
+            print(word.name() + " ----- " + str(frequency_map[word]))
     print("\n\n")
 
 #Takes a map of wordnet Sysnset objects and counts and an interger tolerance and displays a bar
@@ -102,9 +106,9 @@ def graph_frequencies(frequency_map, tolerance):
 if __name__ == '__main__':
 
     #Open file and tokenize into strings
-    path = 'speaking.txt'
+    path = 'listening.txt'
     lemmas = read_lemmas(path)
-
+    #print(lemmas)
     #match all the words to a (somewhat arbitrary) wordnet definition
     #and then count them grab the known words and unknowns
     synset,unknowns = make_synset(lemmas)
@@ -126,7 +130,7 @@ if __name__ == '__main__':
 
 
 
-
+    """
     plt.figure(1)
     graph_frequencies(synset_counts, 5)
     plt.figure(2)
@@ -138,21 +142,21 @@ if __name__ == '__main__':
     plt.figure(5)
     graph_frequencies(hypers_counts_4, 20)
     plt.show()
+    """
 
-
-    print(path)
-    print("\n")
-    print("Parts of Speech:\n")
-    sort_print(tag_pos(lemmas), 4)
+    # print(path)
+    # print("\n")
+    # print("Parts of Speech:\n")
+    # sort_print(tag_pos(lemmas), 10)
     print("\n\n\n")
     print("Words Detected:\n")
 
-    sort_print(synset_counts, 4)
+    sort_print(synset_counts, 10)
     print("First Level of Hypernyms:\n")
-    sort_print(hypers_counts_1, 4)
+    sort_print(hypers_counts_1, 10)
     print("Second Level of Hypernyms:\n")
-    sort_print(hypers_counts_2, 4)
+    sort_print(hypers_counts_2, 10)
     print("Third Level of Hypernyms:\n")
-    sort_print(hypers_counts_3, 4)
+    sort_print(hypers_counts_3, 10)
     print("Fourth Level of Hypernyms:\n")
-    sort_print(hypers_counts_4, 4)
+    sort_print(hypers_counts_4, 10)
