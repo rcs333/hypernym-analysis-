@@ -1,16 +1,10 @@
 __author__ = 'Ryan Shean'
 
-#TODO: Try to fix the arbitary assignment of synsets and hypernyms, maybe with POS tags?
-#TODO: Make the analysis a function
-#TODO: update to pep 8
-#TODO: Analyze algorithm
-#TODO: Try to rework data structure so that I can catch hypernyms regardless of position organize by level of "meaning"
-#TODO: Fix the black magic text encoding section to excise the demons within
+# TODO: Try to fix the arbitary assignment of synsets and hypernyms, maybe with POS tags?
+# TODO: Make the analysis a function
+# TODO: Analyze algorithm
+# TODO: Try to rework data structure so that I can catch hypernyms regardless of position organize by level of "meaning"
 
-
-
-#Honestly this code is black magic right now
-#Anaconda broke my file reading and this fixes the problem so don't ask
 import sys
 reload(sys)
 sys.setdefaultencoding("ISO-8859-1")
@@ -19,15 +13,16 @@ import numpy as np
 import nltk
 from nltk.corpus import wordnet
 
-#function that tokenizes a file given a path and returns a list of all tokens
-#as lemmatized strings
+# function that tokenizes a file given a path and returns a list of all tokens
+# as lemmatized strings
 def read_lemmas(file_path):
     lemmas = [nltk.WordNetLemmatizer().lemmatize(token) for token in open(file_path).read().split()]
     return lemmas
 
-#Takes a list of text strings and returns a list of snyset object coresponding to
-#the strings, duplicates are allowed and strings that do not have synsets are
-#put in another list and returned as a tuple(?) that needs to be indexed to grab
+
+# Takes a list of text strings and returns a list of snyset object coresponding to
+# the strings, duplicates are allowed and strings that do not have synsets are
+# put in another list and returned as a tuple(?) that needs to be indexed to grab
 def make_synset(all_lemmas):
     syn_list = []
     unknown_words = []
@@ -36,10 +31,11 @@ def make_synset(all_lemmas):
             syn_list.append(wordnet.synsets(word)[0])
         except IndexError:
             unknown_words.append(word)
-    return syn_list,unknown_words
+    return syn_list, unknown_words
 
-#Takes a list of synsnet objects and creates and returns a list of all hypernyms
-#inside of the list, duplicates are allowed and the list is completely unsorted
+
+# Takes a list of synsnet objects and creates and returns a list of all hypernyms
+# inside of the list, duplicates are allowed and the list is completely unsorted
 def make_hyper_list(synsets):
     hyper_list = []
     for token in synsets:
@@ -49,9 +45,9 @@ def make_hyper_list(synsets):
             pass
     return hyper_list
 
-#takes a list of words and returns a map containing parts of speech and their counts
-#Had to be hardcoded because POS tagging output tuples(?) and I didn't want to have to deal
-#with generalizing the other function
+# takes a list of words and returns a map containing parts of speech and their counts
+# Had to be hardcoded because POS tagging output tuples(?) and I didn't want to have to deal
+# with generalizing the other function
 def tag_pos(lemmas):
     pos_tagged = nltk.pos_tag(lemmas)
     pos_map = {}
@@ -63,8 +59,9 @@ def tag_pos(lemmas):
             pos_map[pos] = 1
     return pos_map
 
-#Takes a list of any object and counts them and creates a map
-#probobly inefficient but I'm not working with an extremly large data set
+
+# Takes a list of any object and counts them and creates a map
+# probobly inefficient but I'm not working with an extremly large data set
 def create_counts(frequency_map):
     counts = {}
     for item in frequency_map:
@@ -74,17 +71,19 @@ def create_counts(frequency_map):
             counts[item] = 1
     return counts
 
-#Takes a map of Synset Objects and values representing their counts as well as integer tolerance
-#and prints the name of the sysnset objects that appear more than the tolerance in decending order
+
+# Takes a map of Synset Objects and values representing their counts as well as integer tolerance
+# and prints the name of the sysnset objects that appear more than the tolerance in decending order
 def sort_print(frequency_map, tolerance):
     for word in sorted(frequency_map, key=frequency_map.get, reverse=True):
         if frequency_map[word] > tolerance:
             print(word.name() + " ----- " + str(frequency_map[word]))
     print("\n\n")
 
-#Takes a map of wordnet Sysnset objects and counts and an interger tolerance and displays a bar
-#graph of the names of the synset objects with their frequencies on the y-axis. Only prints words
-#that appear in the map more times than the passed tolerance
+
+# Takes a map of wordnet Sysnset objects and counts and an interger tolerance and displays a bar
+# graph of the names of the synset objects with their frequencies on the y-axis. Only prints words
+# that appear in the map more times than the passed tolerance
 def graph_frequencies(frequency_map, tolerance):
         x_label = []
         y_data = []
@@ -95,30 +94,27 @@ def graph_frequencies(frequency_map, tolerance):
                 x_label.append(word.name().partition('.')[0])
                 y_data.append(frequency_map[word])
         x_pos = np.arange(number_of_entries)
-        plt.bar(x_pos,y_data)
+        plt.bar(x_pos, y_data)
         plt.xticks(x_pos, x_label)
 
 
-
-
-
-#I think this allows this code to be imported as a module
+# I think this allows this code to be imported as a module
 if __name__ == '__main__':
 
-    #Open file and tokenize into strings
+    # Open file and tokenize into strings
     path = 'listening.txt'
-    lemmas = read_lemmas(path)
-    #print(lemmas)
-    #match all the words to a (somewhat arbitrary) wordnet definition
-    #and then count them grab the known words and unknowns
-    synset,unknowns = make_synset(lemmas)
+    words = read_lemmas(path)
+    # print(lemmas)
+    # match all the words to a (somewhat arbitrary) wordnet definition
+    # and then count them grab the known words and unknowns
+    synset, unknowns = make_synset(words)
     synset_counts = create_counts(synset)
 
-    #Create a list of hypernyms off the "found" words in the file
+    # Create a list of hypernyms off the "found" words in the file
     hypers_1 = make_hyper_list(synset)
     hypers_counts_1 = create_counts(hypers_1)
 
-    #Create two lists of hypernyms one "level" up each
+    # Create two lists of hypernyms one "level" up each
     hypers_2 = make_hyper_list(hypers_1)
     hypers_counts_2 = create_counts(hypers_2)
 
