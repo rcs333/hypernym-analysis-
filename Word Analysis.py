@@ -98,31 +98,49 @@ def graph_frequencies(frequency_map, tolerance):
         plt.xticks(x_pos, x_label)
 
 
+def filter_synsets(frequency_map, tolerance, interesting_frequency_map):
+    for word in sorted(frequency_map, key=frequency_map.get, reverse=True):
+        if frequency_map[word] >= tolerance:
+            if word in interesting_frequency_map:
+                interesting_frequency_map[word] += frequency_map[word]
+            else:
+                interesting_frequency_map[word] = frequency_map[word]
+        # Only works because we're iterating over a sorted list which has kinda large performance costs
+        # But we'll see if it slows down the program much or nah
+        else:
+            break
+
+
 # I think this allows this code to be imported as a module
 if __name__ == '__main__':
 
     # Open file and tokenize into strings
-    path = 'listening.txt'
+    path = 'speaking.txt'
     words = read_lemmas(path)
+    interesting_bin = {}
     # print(lemmas)
     # match all the words to a (somewhat arbitrary) wordnet definition
     # and then count them grab the known words and unknowns
     synset, unknowns = make_synset(words)
     synset_counts = create_counts(synset)
-
     # Create a list of hypernyms off the "found" words in the file
     hypers_1 = make_hyper_list(synset)
     hypers_counts_1 = create_counts(hypers_1)
+    filter_synsets(hypers_counts_1, 10, interesting_bin)
+
 
     # Create two lists of hypernyms one "level" up each
     hypers_2 = make_hyper_list(hypers_1)
     hypers_counts_2 = create_counts(hypers_2)
+    filter_synsets(hypers_counts_2, 10, interesting_bin)
 
     hypers_3 = make_hyper_list(hypers_2)
     hypers_counts_3 = create_counts(hypers_3)
+    filter_synsets(hypers_counts_3, 10, interesting_bin)
 
     hypers_4 = make_hyper_list(hypers_3)
     hypers_counts_4 = create_counts(hypers_4)
+    filter_synsets(hypers_counts_4, 10, interesting_bin)
 
 
 
@@ -156,3 +174,6 @@ if __name__ == '__main__':
     sort_print(hypers_counts_3, 10)
     print("Fourth Level of Hypernyms:\n")
     sort_print(hypers_counts_4, 10)
+
+    print("Here's the interesting bin")
+    sort_print(interesting_bin, 0)
